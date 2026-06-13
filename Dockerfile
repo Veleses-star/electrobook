@@ -24,9 +24,10 @@ WORKDIR /var/www/html
 COPY . .
 
 # Установка npm зависимостей и сборка (Vite / Laravel Mix)
-RUN npm install --no-audit --no-fund && \
-    chmod -R +x node_modules/.bin && \
-    npm run build
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install --no-audit --no-fund \
+    && if npm run | grep -q '"build"'; then npm run build; else npx mix --production; fi
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
