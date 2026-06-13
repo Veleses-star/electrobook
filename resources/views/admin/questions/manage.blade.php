@@ -21,7 +21,7 @@
                     <div class="space-y-6">
                         @foreach($questions as $index => $q)
                             <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
-                                <div class="flex justify-between items-start gap-4">
+                                <div class="flex flex-col md:flex-row justify-between items-start gap-4">
                                     <div class="flex-1">
                                         <p class="font-bold text-gray-800 dark:text-gray-100">{{ $index+1 }}. {{ $q->question_text }}</p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400">Тип: {{ $q->question_type }} | Баллов: {{ $q->points }}</p>
@@ -34,12 +34,12 @@
                                             @endforeach
                                         </div>
                                     </div>
-                                    <div class="flex gap-2">
-                                        <a href="{{ route('admin.question.edit', $q->id) }}" class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 transition">Редактировать</a>
+                                    <div class="flex flex-col sm:flex-row gap-2">
+                                        <a href="{{ route('admin.question.edit', $q->id) }}" class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 transition text-center">Редактировать</a>
                                         <form action="{{ route('admin.question.delete', $q->id) }}" method="POST" onsubmit="return confirm('Удалить вопрос?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="px-3 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded hover:bg-red-200 transition">Удалить</button>
+                                            <button type="submit" class="w-full sm:w-auto px-3 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded hover:bg-red-200 transition text-center">Удалить</button>
                                         </form>
                                     </div>
                                 </div>
@@ -60,7 +60,7 @@
                             <textarea name="question_text" rows="3" required class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition"></textarea>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Тип вопроса</label>
                                 <select name="question_type" id="question_type" required class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition" onchange="toggleAnswerMode()">
