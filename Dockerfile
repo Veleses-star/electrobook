@@ -1,5 +1,6 @@
 FROM php:8.2-fpm
 
+# Установка системных зависимостей
 RUN apt-get update && apt-get install -y \
     nginx \
     curl \
@@ -12,13 +13,19 @@ RUN apt-get update && apt-get install -y \
     netcat-openbsd \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
+# Установка Node.js (для сборки фронтенда)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
 COPY . .
 
-COPY nginx.conf /etc/nginx/nginx.conf
+# Установка npm зависимостей и сборка (Vite / Laravel Mix)
+RUN npm install --no-audit --no-fund
+RUN npm run build  # или npm run production, смотрите ваш package.json
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
