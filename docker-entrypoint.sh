@@ -1,11 +1,14 @@
 #!/bin/bash
 set -e
 
-echo "Waiting for database..."
-while ! nc -z db 3306; do
-  sleep 1
-done
-echo "Database ready."
+# Ожидаем готовности базы данных, если указаны переменные DB_HOST и DB_PORT
+if [ -n "$DB_HOST" ] && [ -n "$DB_PORT" ]; then
+    echo "Waiting for database $DB_HOST:$DB_PORT..."
+    while ! nc -z "$DB_HOST" "$DB_PORT"; do
+        sleep 1
+    done
+    echo "Database ready."
+fi
 
 if [ -z "$APP_KEY" ]; then
     php artisan key:generate --force
