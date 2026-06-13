@@ -123,7 +123,6 @@ class AdminController extends Controller
         $type = $validated['question_type'];
 
         if ($type === 'text_input') {
-            // Ввод текста: один правильный ответ
             $correctText = $request->input('correct_text');
             if ($correctText) {
                 $question->answers()->create([
@@ -132,7 +131,6 @@ class AdminController extends Controller
                 ]);
             }
         } elseif ($type === 'matching') {
-            // Соответствие: пары (левая→правая)
             $leftParts = $request->input('matching_left', []);
             $rightParts = $request->input('matching_right', []);
             $count = min(count($leftParts), count($rightParts));
@@ -147,7 +145,7 @@ class AdminController extends Controller
                 }
             }
         } else {
-            // single_choice / multiple_choice: варианты с чекбоксами
+            // single_choice / multiple_choice
             $answers = $request->input('answers', []);
             $correctAnswers = $request->input('correct_answer', []);
             foreach ($answers as $index => $text) {

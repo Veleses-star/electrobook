@@ -15,12 +15,10 @@ class TestController extends Controller
     public function selectLevel($subjectId)
     {
         $subject = Subject::findOrFail($subjectId);
-        $levels = DifficultyLevel::all(); // без теории
-
+        $levels = DifficultyLevel::all();
         return view('tests.select-level', compact('subject', 'levels'));
     }
 
-    // Новый метод: список тестов для предмета и класса
     public function listTests($subjectId, $difficultyId)
     {
         $subject = Subject::findOrFail($subjectId);
@@ -29,32 +27,30 @@ class TestController extends Controller
                      ->where('difficulty_id', $difficultyId)
                      ->where('is_active', true)
                      ->get();
-
         return view('tests.list', compact('subject', 'level', 'tests'));
     }
 
-    // Новый метод: старт теста по ID
     public function startTestById($testId)
     {
         $test = Test::findOrFail($testId);
-        $questions = $test->questions()->with('answers')->get();
+        $questions = $test->questions()->with('answers')->orderBy('order_index')->get();
 
-        if ($questions->isEmpty()) {
-            return redirect()->back()->with('error', 'В этом тесте пока нет вопросов.');
+        // Подготовка данных для вопросов типа "соответствие"
+        foreach ($questions as $question) {
+            if ($question->question_type == 'matching') {
+                $pairs = [];
+                $rightOptions = [];
+                foreach ($question->answers as $answer) {
+                    $parts = explode(' → ', $answer->answer_text);
+                    if (count($parts) == 2) {
+                        $pairs[] = ['left' => $parts[0], 'right' => $parts[1]];
+                        $rightOptions[] = $parts[1];
+                    }
+                }
+                $question->matching_pairs = $pairs;
+                $question->right_options = array_unique($rightOptions);
+            }
         }
-
-        return view('tests.take-test', compact('test', 'questions'));
-    }
-
-    // Старый метод (можно оставить, но лучше не использовать)
-    public function startTest($subjectId, $difficultyId)
-    {
-        $test = Test::where('subject_id', $subjectId)
-                    ->where('difficulty_id', $difficultyId)
-                    ->where('is_active', true)
-                    ->firstOrFail();
-
-        $questions = $test->questions()->with('answers')->get();
 
         if ($questions->isEmpty()) {
             return redirect()->back()->with('error', 'В этом тесте пока нет вопросов.');
@@ -72,13 +68,45 @@ class TestController extends Controller
         $totalQuestions = $test->questions()->count();
         $correctCount = 0;
 
-        foreach ($answers as $questionId => $selectedAnswerId) {
-            $correctAnswer = Answer::where('question_id', $questionId)
-                                   ->where('is_correct', true)
-                                   ->first();
-
-            if ($correctAnswer && $correctAnswer->id == $selectedAnswerId) {
-                $correctCount++;
+        foreach ($test->questions as $question) {
+            if ($question->question_type == 'matching') {
+                // Получаем правильные соответствия
+                $correctMap = [];
+                foreach ($question->answers as $answer) {
+                    $parts = explode(' → ', $answer->answer_text);
+                    if (count($parts) == 2) {
+                        $correctMap[$parts[0]] = $parts[1];
+                    }
+                }
+                // Получаем ответы пользователя
+                $userMatches = $answers[$question->id] ?? [];
+                foreach ($correctMap as $left => $right) {
+                    if (isset($userMatches[$left]) && $userMatches[$left] == $right) {
+                        $correctCount++;
+                    }
+                }
+            } else {
+                $selected = $answers[$question->id] ?? null;
+                if ($selected) {
+                    if ($question->question_type == 'text_input') {
+                        $correctAnswer = $question->answers->first()->answer_text;
+                        if (strtolower(trim($selected)) == strtolower(trim($correctAnswer))) {
+                            $correctCount++;
+                        }
+                    } else {
+                        $correctAnswerIds = $question->answers->where('is_correct', true)->pluck('id')->toArray();
+                        if ($question->question_type == 'single_choice') {
+                            if ($selected == $correctAnswerIds[0]) {
+                                $correctCount++;
+                            }
+                        } elseif ($question->question_type == 'multiple_choice') {
+                            $selectedIds = is_array($selected) ? $selected : [$selected];
+                            if (empty(array_diff($selectedIds, $correctAnswerIds)) && empty(array_diff($correctAnswerIds, $selectedIds))) {
+                                $correctCount++;
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -92,6 +120,7 @@ class TestController extends Controller
             'score' => $correctCount,
             'max_score' => $totalQuestions,
             'percentage' => round($percentage, 2),
+            'completed_at' => now(),
         ]);
 
         return view('tests.result', compact('test', 'correctCount', 'totalQuestions', 'percentage', 'earnedPoints'));

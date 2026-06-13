@@ -51,8 +51,7 @@
                                     <div class="flex flex-col sm:flex-row gap-2">
                                         <a href="{{ route('admin.question.edit', $q->id) }}" class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 transition text-center">Редактировать</a>
                                         <form action="{{ route('admin.question.delete', $q->id) }}" method="POST" onsubmit="return confirm('Удалить вопрос?')">
-                                            @csrf
-                                            @method('DELETE')
+                                            @csrf @method('DELETE')
                                             <button type="submit" class="w-full sm:w-auto px-3 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded hover:bg-red-200 transition text-center">Удалить</button>
                                         </form>
                                     </div>
@@ -110,22 +109,24 @@
                             <input type="text" name="correct_text" placeholder="Введите правильный ответ" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
                         </div>
 
-                        <!-- Блок для соответствия (matching) -->
+                        <!-- Блок для соответствия (matching) – адаптирован для телефонов -->
                         <div id="matching-block" style="display: none;">
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Пары для соответствия (левая часть → правая часть)</label>
-                            <div id="matching-container" class="space-y-3">
-                                <div class="flex gap-3 matching-row">
-                                    <input type="text" name="matching_left[]" placeholder="Левая часть 1" class="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
-                                    <span class="text-gray-500 dark:text-gray-400">→</span>
-                                    <input type="text" name="matching_right[]" placeholder="Правая часть 1" class="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Пары для соответствия</label>
+                            <div id="matching-container" class="space-y-4">
+                                <div class="matching-pair border rounded-lg p-3 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <input type="text" name="matching_left[]" placeholder="Левая часть 1" class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
+                                        <input type="text" name="matching_right[]" placeholder="Правая часть 1" class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
+                                    </div>
                                 </div>
-                                <div class="flex gap-3 matching-row">
-                                    <input type="text" name="matching_left[]" placeholder="Левая часть 2" class="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
-                                    <span class="text-gray-500 dark:text-gray-400">→</span>
-                                    <input type="text" name="matching_right[]" placeholder="Правая часть 2" class="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
+                                <div class="matching-pair border rounded-lg p-3 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <input type="text" name="matching_left[]" placeholder="Левая часть 2" class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
+                                        <input type="text" name="matching_right[]" placeholder="Правая часть 2" class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
+                                    </div>
                                 </div>
                             </div>
-                            <button type="button" onclick="addMatchingPair()" class="mt-2 text-sm text-blue-600 dark:text-blue-400">+ Добавить ещё пару</button>
+                            <button type="button" onclick="addMatchingPair()" class="mt-3 text-sm text-blue-600 dark:text-blue-400 hover:underline">+ Добавить ещё пару</button>
                         </div>
                     </div>
 
@@ -155,12 +156,14 @@
 
         function addMatchingPair() {
             const container = document.getElementById('matching-container');
+            const pairCount = container.children.length + 1;
             const newDiv = document.createElement('div');
-            newDiv.className = 'flex gap-3 matching-row';
+            newDiv.className = 'matching-pair border rounded-lg p-3 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30';
             newDiv.innerHTML = `
-                <input type="text" name="matching_left[]" placeholder="Левая часть" class="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
-                <span class="text-gray-500 dark:text-gray-400">→</span>
-                <input type="text" name="matching_right[]" placeholder="Правая часть" class="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <input type="text" name="matching_left[]" placeholder="Левая часть ${pairCount}" class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
+                    <input type="text" name="matching_right[]" placeholder="Правая часть ${pairCount}" class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
+                </div>
             `;
             container.appendChild(newDiv);
             matchingPairCount++;
@@ -176,7 +179,6 @@
             textInputBlock.style.display = (type === 'text_input') ? 'block' : 'none';
             matchingBlock.style.display = (type === 'matching') ? 'block' : 'none';
 
-            // Если тип single_choice – ограничиваем выбор одного чекбокса
             if (type === 'single_choice') {
                 const checkboxes = document.querySelectorAll('#answers-container .correct-checkbox');
                 checkboxes.forEach(cb => {
@@ -192,7 +194,6 @@
             }
         }
 
-        // Инициализация при загрузке
         document.addEventListener('DOMContentLoaded', toggleAnswerType);
     </script>
 </x-app-layout>
