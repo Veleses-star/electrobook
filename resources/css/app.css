@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --bg-body: #F0F8FF;      /* kid-bg */
+    --bg-card: #FFFFFF;      /* kid-card */
+    --text-color: #1f2937;   /* тёмно-серый */
+    --primary: #FF9F43;      /* kid-primary */
+    --secondary: #54A0FF;    /* kid-secondary */
+}
+
+/* Тёмная тема */
+.dark {
+    --bg-body: #1a1a2e;      /* dark-bg */
+    --bg-card: #16213e;      /* dark-card */
+    --text-color: #e5e7eb;   /* светлый текст */
+    --primary: #f39c12;      /* dark-primary */
+    --secondary: #3498db;    /* dark-secondary */
+}
+
+/* Применяем переменные ко всем элементам */
+body {
+    background-color: var(--bg-body);
+    color: var(--text-color);
+}
+.card {
+    background-color: var(--bg-card);
+}
+.primary-button {
+    background-color: var(--secondary);
+}
+
+.gold-frame {
+    border: 3px solid #ffd700;
+    border-radius: 9999px;
+    padding: 2px;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px #ffd700;
+}

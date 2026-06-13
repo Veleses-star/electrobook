@@ -1,0 +1,29 @@
+<x-guest-layout>
+    <div class="mb-4 text-sm text-gray-600 dark:text-gray-300">
+        {{ __('Забыли пароль? Укажите ваш email, и мы пришлём ссылку для создания нового пароля.') }}
+    </div>
+
+    <!-- Session Status -->
+    <x-auth-session-status class="mb-4" :status="session('status')" />
+
+    <form method="POST" action="{{ route('password.email') }}">
+        @csrf
+
+        <!-- Email Address -->
+        <div>
+            <x-input-label for="email" :value="__('Email')" class="dark:text-gray-300" />
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
+            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
+
+        <div class="flex items-center justify-between mt-4">
+            <a href="{{ route('login') }}" class="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition">
+                ← {{ __('Назад') }}
+            </a>
+
+            <x-primary-button>
+                {{ __('Отправить ссылку для сброса пароля') }}
+            </x-primary-button>
+        </div>
+    </form>
+</x-guest-layout>
