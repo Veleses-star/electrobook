@@ -8,74 +8,106 @@
 
     <div class="py-12 bg-kid-bg dark:bg-dark-bg min-h-screen">
         <div class="max-w-7xl mx-auto px-4">
-            {{-- Статистика --}}
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-lg border-l-4 border-blue-500 dark:border-blue-400">
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Всего учеников</p>
-                    <p class="text-3xl font-extrabold text-gray-800 dark:text-gray-100">{{ $stats['users'] }}</p>
+
+            {{-- Статистика (карточки) --}}
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white dark:bg-dark-card p-4 rounded-2xl shadow-md border-l-4 border-blue-500 dark:border-blue-400">
+                    <p class="text-gray-500 dark:text-gray-400 text-xs uppercase">Учеников</p>
+                    <p class="text-2xl font-extrabold text-gray-800 dark:text-gray-100">{{ $stats['users'] }}</p>
                 </div>
-                <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-lg border-l-4 border-orange-500 dark:border-orange-400">
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Активных тестов</p>
-                    <p class="text-3xl font-extrabold text-gray-800 dark:text-gray-100">{{ $stats['tests'] }}</p>
+                <div class="bg-white dark:bg-dark-card p-4 rounded-2xl shadow-md border-l-4 border-orange-500 dark:border-orange-400">
+                    <p class="text-gray-500 dark:text-gray-400 text-xs uppercase">Тестов</p>
+                    <p class="text-2xl font-extrabold text-gray-800 dark:text-gray-100">{{ $stats['tests'] }}</p>
                 </div>
-                <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-lg border-l-4 border-green-500 dark:border-green-400">
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Пройдено тестов</p>
-                    <p class="text-3xl font-extrabold text-gray-800 dark:text-gray-100">{{ $stats['results'] }}</p>
+                <div class="bg-white dark:bg-dark-card p-4 rounded-2xl shadow-md border-l-4 border-green-500 dark:border-green-400">
+                    <p class="text-gray-500 dark:text-gray-400 text-xs uppercase">Пройдено</p>
+                    <p class="text-2xl font-extrabold text-gray-800 dark:text-gray-100">{{ $stats['results'] }}</p>
                 </div>
-                <div class="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-lg border-l-4 border-yellow-500 dark:border-yellow-400">
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Всего баллов в системе</p>
-                    <p class="text-3xl font-extrabold text-gray-800 dark:text-gray-100">{{ $stats['total_points'] }} ⭐</p>
+                <div class="bg-white dark:bg-dark-card p-4 rounded-2xl shadow-md border-l-4 border-yellow-500 dark:border-yellow-400">
+                    <p class="text-gray-500 dark:text-gray-400 text-xs uppercase">Баллов</p>
+                    <p class="text-2xl font-extrabold text-gray-800 dark:text-gray-100">{{ $stats['total_points'] }}</p>
                 </div>
             </div>
 
             {{-- Кнопка экспорта --}}
-            <div class="mb-8 text-right">
+            <div class="flex justify-end mb-8">
                 <a href="{{ route('admin.export') }}" 
                    class="inline-block px-6 py-3 bg-gradient-to-r from-kid-secondary to-blue-400 dark:from-dark-secondary dark:to-blue-600 text-black dark:text-white font-extrabold text-sm md:text-base rounded-xl shadow-md hover:shadow-lg transition">
                     📎 Выгрузить отчет (Excel)
                 </a>
             </div>
 
-            {{-- Таблица последних прохождений (без кнопок действий) --}}
+            {{-- Блок последних прохождений --}}
             <div class="bg-white dark:bg-dark-card rounded-2xl shadow-xl overflow-hidden">
-                <div class="p-6 border-b border-gray-100 dark:border-gray-700">
-                    <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">📊 Последние прохождения</h3>
+                <div class="p-4 border-b border-gray-100 dark:border-gray-700">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">📊 Последние прохождения</h3>
                 </div>
-                <div class="overflow-x-auto">
+
+                {{-- Десктопная таблица (видна с md) --}}
+                <div class="hidden md:block overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 uppercase text-xs">
                             <tr>
-                                <th class="p-4">Ученик</th>
-                                <th class="p-4">Тест</th>
-                                <th class="p-4">Предмет</th>
-                                <th class="p-4">Результат</th>
-                                <th class="p-4">Дата</th>
+                                <th class="p-3">Ученик</th>
+                                <th class="p-3">Тест</th>
+                                <th class="p-3">Предмет</th>
+                                <th class="p-3">Результат</th>
+                                <th class="p-3">Дата</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                             @forelse($recentResults as $result)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-200">
-                                    <td class="p-4 font-medium text-gray-800 dark:text-gray-200">{{ $result->user->name }}</td>
-                                    <td class="p-4 text-gray-600 dark:text-gray-400">{{ $result->test->title }}</td>
-                                    <td class="p-4">
+                                    <td class="p-3 font-medium text-gray-800 dark:text-gray-200">{{ $result->user->name }}</td>
+                                    <td class="p-3 text-gray-600 dark:text-gray-400">{{ $result->test->title }}</td>
+                                    <td class="p-3">
                                         <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-lg text-xs font-bold">
                                             {{ $result->test->subject->name }}
                                         </span>
                                     </td>
-                                    <td class="p-4">
+                                    <td class="p-3">
                                         <span class="font-bold {{ $result->percentage >= 80 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400' }}">
                                             {{ $result->percentage }}%
                                         </span>
                                     </td>
-                                    <td class="p-4 text-sm text-gray-500 dark:text-gray-400">
+                                    <td class="p-3 text-gray-500 dark:text-gray-400 text-sm">
                                         {{ $result->completed_at->format('d.m.Y H:i') }}
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="5" class="p-8 text-center text-gray-500 dark:text-gray-400">Пока нет результатов</td></tr>
+                                <tr>
+                                    <td colspan="5" class="p-8 text-center text-gray-500 dark:text-gray-400">Пока нет результатов</td>
+                                </tr>
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+
+                {{-- Карточки для телефонов (видно только на экранах < md) --}}
+                <div class="md:hidden divide-y divide-gray-100 dark:divide-gray-700">
+                    @forelse($recentResults as $result)
+                        <div class="p-4 space-y-2">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-bold text-gray-800 dark:text-gray-200">{{ $result->user->name }}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $result->test->title }}</p>
+                                </div>
+                                <span class="text-lg font-bold {{ $result->percentage >= 80 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400' }}">
+                                    {{ $result->percentage }}%
+                                </span>
+                            </div>
+                            <div class="flex flex-wrap gap-2 text-xs">
+                                <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-lg">
+                                    {{ $result->test->subject->name }}
+                                </span>
+                                <span class="text-gray-500 dark:text-gray-400">
+                                    {{ $result->completed_at->format('d.m.Y H:i') }}
+                                </span>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="p-8 text-center text-gray-500 dark:text-gray-400">Пока нет результатов</div>
+                    @endforelse
                 </div>
             </div>
         </div>

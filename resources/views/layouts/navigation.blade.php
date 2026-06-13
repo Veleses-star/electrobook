@@ -99,6 +99,9 @@
                 <x-responsive-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
                     {{ __('Админ-панель') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.tests.manage')" :active="request()->routeIs('admin.tests.manage')">
+                    {{ __('Управление тестами') }}
+                </x-responsive-nav-link>
             @endif
         </div>
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-700">
