@@ -26,12 +26,26 @@
                                         <p class="font-bold text-gray-800 dark:text-gray-100">{{ $index+1 }}. {{ $q->question_text }}</p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400">Тип: {{ $q->question_type }} | Баллов: {{ $q->points }}</p>
                                         <div class="mt-2 space-y-1">
-                                            @foreach($q->answers as $answer)
+                                            @if($q->question_type == 'text_input')
                                                 <div class="flex items-center gap-2 text-sm">
-                                                    <span class="w-5">{{ $answer->is_correct ? '✅' : '❌' }}</span>
-                                                    <span class="text-gray-700 dark:text-gray-300">{{ $answer->answer_text }}</span>
+                                                    <span class="w-5">✏️</span>
+                                                    <span class="text-gray-700 dark:text-gray-300">Правильный ответ: {{ $q->answers->first()->answer_text ?? '?' }}</span>
                                                 </div>
-                                            @endforeach
+                                            @elseif($q->question_type == 'matching')
+                                                @foreach($q->answers as $answer)
+                                                    <div class="flex items-center gap-2 text-sm">
+                                                        <span class="w-5">🔗</span>
+                                                        <span class="text-gray-700 dark:text-gray-300">{{ $answer->answer_text }}</span>
+                                                    </div>
+                                                @endforeach
+                                            @else
+                                                @foreach($q->answers as $answer)
+                                                    <div class="flex items-center gap-2 text-sm">
+                                                        <span class="w-5">{{ $answer->is_correct ? '✅' : '❌' }}</span>
+                                                        <span class="text-gray-700 dark:text-gray-300">{{ $answer->answer_text }}</span>
+                                                    </div>
+                                                @endforeach
+                                            @endif
                                         </div>
                                     </div>
                                     <div class="flex flex-col sm:flex-row gap-2">
@@ -63,7 +77,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Тип вопроса</label>
-                                <select name="question_type" id="question_type" required class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition" onchange="toggleAnswerMode()">
+                                <select name="question_type" id="question_type" required class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition" onchange="toggleAnswerType()">
                                     <option value="single_choice">Один правильный ответ</option>
                                     <option value="multiple_choice">Несколько правильных</option>
                                     <option value="text_input">Ввод текста</option>
@@ -76,7 +90,8 @@
                             </div>
                         </div>
 
-                        <div>
+                        <!-- Блок для типов с вариантами ответов (single_choice, multiple_choice) -->
+                        <div id="answers-block" style="display: none;">
                             <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Варианты ответов</label>
                             <div id="answers-container" class="space-y-3">
                                 @for($i = 0; $i < 4; $i++)
@@ -87,6 +102,30 @@
                                 @endfor
                             </div>
                             <button type="button" onclick="addAnswerField()" class="mt-2 text-sm text-blue-600 dark:text-blue-400">+ Добавить ещё вариант</button>
+                        </div>
+
+                        <!-- Блок для текстового ввода (text_input) -->
+                        <div id="text-input-block" style="display: none;">
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Правильный ответ (точное совпадение)</label>
+                            <input type="text" name="correct_text" placeholder="Введите правильный ответ" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
+                        </div>
+
+                        <!-- Блок для соответствия (matching) -->
+                        <div id="matching-block" style="display: none;">
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Пары для соответствия (левая часть → правая часть)</label>
+                            <div id="matching-container" class="space-y-3">
+                                <div class="flex gap-3 matching-row">
+                                    <input type="text" name="matching_left[]" placeholder="Левая часть 1" class="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
+                                    <span class="text-gray-500 dark:text-gray-400">→</span>
+                                    <input type="text" name="matching_right[]" placeholder="Правая часть 1" class="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
+                                </div>
+                                <div class="flex gap-3 matching-row">
+                                    <input type="text" name="matching_left[]" placeholder="Левая часть 2" class="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
+                                    <span class="text-gray-500 dark:text-gray-400">→</span>
+                                    <input type="text" name="matching_right[]" placeholder="Правая часть 2" class="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
+                                </div>
+                            </div>
+                            <button type="button" onclick="addMatchingPair()" class="mt-2 text-sm text-blue-600 dark:text-blue-400">+ Добавить ещё пару</button>
                         </div>
                     </div>
 
@@ -100,6 +139,7 @@
 
     <script>
         let answerCount = 4;
+        let matchingPairCount = 2;
 
         function addAnswerField() {
             const container = document.getElementById('answers-container');
@@ -107,16 +147,38 @@
             newDiv.className = 'flex gap-3 answer-row';
             newDiv.innerHTML = `
                 <input type="checkbox" name="correct_answer[]" value="${answerCount}" class="correct-checkbox mt-3 w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-green-500 focus:ring-green-500 dark:bg-dark-card">
-                <input type="text" name="answers[]" placeholder="Новый вариант" class="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
+                <input type="text" name="answers[]" placeholder="Вариант ${answerCount+1}" class="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
             `;
             container.appendChild(newDiv);
             answerCount++;
         }
 
-        function toggleAnswerMode() {
+        function addMatchingPair() {
+            const container = document.getElementById('matching-container');
+            const newDiv = document.createElement('div');
+            newDiv.className = 'flex gap-3 matching-row';
+            newDiv.innerHTML = `
+                <input type="text" name="matching_left[]" placeholder="Левая часть" class="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
+                <span class="text-gray-500 dark:text-gray-400">→</span>
+                <input type="text" name="matching_right[]" placeholder="Правая часть" class="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-card dark:text-white focus:border-kid-secondary dark:focus:border-dark-secondary transition">
+            `;
+            container.appendChild(newDiv);
+            matchingPairCount++;
+        }
+
+        function toggleAnswerType() {
             const type = document.getElementById('question_type').value;
-            const checkboxes = document.querySelectorAll('.correct-checkbox');
+            const answersBlock = document.getElementById('answers-block');
+            const textInputBlock = document.getElementById('text-input-block');
+            const matchingBlock = document.getElementById('matching-block');
+
+            answersBlock.style.display = (type === 'single_choice' || type === 'multiple_choice') ? 'block' : 'none';
+            textInputBlock.style.display = (type === 'text_input') ? 'block' : 'none';
+            matchingBlock.style.display = (type === 'matching') ? 'block' : 'none';
+
+            // Если тип single_choice – ограничиваем выбор одного чекбокса
             if (type === 'single_choice') {
+                const checkboxes = document.querySelectorAll('#answers-container .correct-checkbox');
                 checkboxes.forEach(cb => {
                     cb.onclick = function() {
                         if (this.checked) {
@@ -125,10 +187,12 @@
                     };
                 });
             } else {
+                const checkboxes = document.querySelectorAll('#answers-container .correct-checkbox');
                 checkboxes.forEach(cb => cb.onclick = null);
             }
         }
 
-        document.addEventListener('DOMContentLoaded', toggleAnswerMode);
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', toggleAnswerType);
     </script>
 </x-app-layout>

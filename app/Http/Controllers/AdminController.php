@@ -104,15 +104,13 @@ class AdminController extends Controller
         return view('admin.questions.manage', compact('test', 'questions'));
     }
 
-    // Сохранение вопроса (редирект на manageQuestions)
+    // Сохранение вопроса (с поддержкой всех типов)
     public function storeQuestion(Request $request, $testId)
     {
         $validated = $request->validate([
             'question_text' => 'required|string',
             'question_type' => 'required|in:single_choice,multiple_choice,text_input,matching',
             'points' => 'required|integer|min:1',
-            'answers' => 'required|array|min:2',
-            'correct_answer' => 'required|array|min:1',
         ]);
 
         $question = Question::create([
@@ -122,14 +120,45 @@ class AdminController extends Controller
             'points' => $validated['points'],
         ]);
 
-        foreach ($validated['answers'] as $index => $text) {
-            if (empty(trim($text))) continue;
-            $isCorrect = in_array($index, $validated['correct_answer']);
-            $question->answers()->create([
-                'answer_text' => trim($text),
-                'is_correct' => $isCorrect,
-                'order_index' => $index,
-            ]);
+        $type = $validated['question_type'];
+
+        if ($type === 'text_input') {
+            // Ввод текста: один правильный ответ
+            $correctText = $request->input('correct_text');
+            if ($correctText) {
+                $question->answers()->create([
+                    'answer_text' => trim($correctText),
+                    'is_correct' => true,
+                ]);
+            }
+        } elseif ($type === 'matching') {
+            // Соответствие: пары (левая→правая)
+            $leftParts = $request->input('matching_left', []);
+            $rightParts = $request->input('matching_right', []);
+            $count = min(count($leftParts), count($rightParts));
+            for ($i = 0; $i < $count; $i++) {
+                $left = trim($leftParts[$i] ?? '');
+                $right = trim($rightParts[$i] ?? '');
+                if ($left !== '' && $right !== '') {
+                    $question->answers()->create([
+                        'answer_text' => $left . ' → ' . $right,
+                        'is_correct' => true,
+                    ]);
+                }
+            }
+        } else {
+            // single_choice / multiple_choice: варианты с чекбоксами
+            $answers = $request->input('answers', []);
+            $correctAnswers = $request->input('correct_answer', []);
+            foreach ($answers as $index => $text) {
+                if (empty(trim($text))) continue;
+                $isCorrect = in_array($index, $correctAnswers);
+                $question->answers()->create([
+                    'answer_text' => trim($text),
+                    'is_correct' => $isCorrect,
+                    'order_index' => $index,
+                ]);
+            }
         }
 
         return redirect()->route('admin.questions.manage', $testId)->with('success', 'Вопрос добавлен');
@@ -151,7 +180,7 @@ class AdminController extends Controller
         return view('admin.questions.edit', compact('question'));
     }
 
-    // Обновление вопроса
+    // Обновление вопроса (с поддержкой всех типов)
     public function updateQuestion(Request $request, $id)
     {
         $question = Question::findOrFail($id);
@@ -159,8 +188,6 @@ class AdminController extends Controller
             'question_text' => 'required|string',
             'question_type' => 'required|in:single_choice,multiple_choice,text_input,matching',
             'points' => 'required|integer|min:1',
-            'answers' => 'required|array|min:2',
-            'correct_answer' => 'required|array|min:1',
         ]);
 
         $question->update([
@@ -169,21 +196,51 @@ class AdminController extends Controller
             'points' => $validated['points'],
         ]);
 
+        // Удаляем старые ответы
         $question->answers()->delete();
-        foreach ($validated['answers'] as $index => $text) {
-            if (empty(trim($text))) continue;
-            $isCorrect = in_array($index, $validated['correct_answer']);
-            $question->answers()->create([
-                'answer_text' => trim($text),
-                'is_correct' => $isCorrect,
-                'order_index' => $index,
-            ]);
+
+        $type = $validated['question_type'];
+
+        if ($type === 'text_input') {
+            $correctText = $request->input('correct_text');
+            if ($correctText) {
+                $question->answers()->create([
+                    'answer_text' => trim($correctText),
+                    'is_correct' => true,
+                ]);
+            }
+        } elseif ($type === 'matching') {
+            $leftParts = $request->input('matching_left', []);
+            $rightParts = $request->input('matching_right', []);
+            $count = min(count($leftParts), count($rightParts));
+            for ($i = 0; $i < $count; $i++) {
+                $left = trim($leftParts[$i] ?? '');
+                $right = trim($rightParts[$i] ?? '');
+                if ($left !== '' && $right !== '') {
+                    $question->answers()->create([
+                        'answer_text' => $left . ' → ' . $right,
+                        'is_correct' => true,
+                    ]);
+                }
+            }
+        } else {
+            $answers = $request->input('answers', []);
+            $correctAnswers = $request->input('correct_answer', []);
+            foreach ($answers as $index => $text) {
+                if (empty(trim($text))) continue;
+                $isCorrect = in_array($index, $correctAnswers);
+                $question->answers()->create([
+                    'answer_text' => trim($text),
+                    'is_correct' => $isCorrect,
+                    'order_index' => $index,
+                ]);
+            }
         }
 
         return redirect()->route('admin.questions.manage', $question->test_id)->with('success', 'Вопрос обновлён');
     }
 
-    // Экспорт CSV
+    // Экспорт результатов в CSV
     public function exportCsv()
     {
         $filename = "otchet_testy_" . date('Y-m-d') . ".csv";
