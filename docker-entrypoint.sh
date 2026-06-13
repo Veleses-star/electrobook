@@ -19,6 +19,8 @@ php artisan route:cache
 php artisan view:cache
 php artisan migrate --force
 php artisan storage:link
+php artisan config:clear
+php artisan config:cache
 
 nginx
 php-fpm -F
