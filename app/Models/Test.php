@@ -11,7 +11,7 @@ class Test extends Model
 
     protected $fillable = [
         'subject_id', 'difficulty_id', 'title', 'description', 
-        'time_limit', 'points_for_completion', 'is_active'
+        'time_limit', 'points_for_completion', 'is_active', 'theory'
     ];
 
     /**

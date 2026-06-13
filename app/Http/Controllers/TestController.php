@@ -7,7 +7,6 @@ use App\Models\DifficultyLevel;
 use App\Models\Test;
 use App\Models\Answer;
 use App\Models\TestResult;
-use App\Models\Theory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,11 +15,38 @@ class TestController extends Controller
     public function selectLevel($subjectId)
     {
         $subject = Subject::findOrFail($subjectId);
-        $levels = DifficultyLevel::with('theory')->get();
+        $levels = DifficultyLevel::all(); // без теории
 
         return view('tests.select-level', compact('subject', 'levels'));
     }
 
+    // Новый метод: список тестов для предмета и класса
+    public function listTests($subjectId, $difficultyId)
+    {
+        $subject = Subject::findOrFail($subjectId);
+        $level = DifficultyLevel::findOrFail($difficultyId);
+        $tests = Test::where('subject_id', $subjectId)
+                     ->where('difficulty_id', $difficultyId)
+                     ->where('is_active', true)
+                     ->get();
+
+        return view('tests.list', compact('subject', 'level', 'tests'));
+    }
+
+    // Новый метод: старт теста по ID
+    public function startTestById($testId)
+    {
+        $test = Test::findOrFail($testId);
+        $questions = $test->questions()->with('answers')->get();
+
+        if ($questions->isEmpty()) {
+            return redirect()->back()->with('error', 'В этом тесте пока нет вопросов.');
+        }
+
+        return view('tests.take-test', compact('test', 'questions'));
+    }
+
+    // Старый метод (можно оставить, но лучше не использовать)
     public function startTest($subjectId, $difficultyId)
     {
         $test = Test::where('subject_id', $subjectId)

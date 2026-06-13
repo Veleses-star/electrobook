@@ -102,7 +102,8 @@
                         $icon = $iconMap[$level->code] ?? '🎓';
                         $theory = $level->theory;
                     @endphp
-                    <div class="group block bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border-2 border-{{ $color }}-300 hover:border-{{ $color }}-500">
+                    <a href="{{ route('tests.list', ['subjectId' => $subject->id, 'difficultyId' => $level->id]) }}" 
+                       class="group block bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border-2 border-{{ $color }}-300 hover:border-{{ $color }}-500">
                         <div class="p-6 text-center">
                             <div class="text-6xl mb-4 group-hover:scale-110 transition-transform inline-block">
                                 {{ $icon }}
@@ -122,35 +123,18 @@
                             </button>
                             @endif
                             
-                            <a href="{{ route('tests.start', ['subjectId' => $subject->id, 'difficultyId' => $level->id]) }}" 
-                               class="mt-3 inline-block text-base font-semibold 
-                                   @if($color == 'purple') text-purple-700 dark:text-purple-300
-                                   @else text-{{ $color }}-600 dark:text-{{ $color }}-400 @endif
-                                   hover:underline">
-                                Начать тест →
-                            </a>
+                            <span class="mt-3 inline-block text-base font-semibold 
+                                        @if($color == 'purple') text-purple-700 dark:text-purple-300
+                                        @else text-{{ $color }}-600 dark:text-{{ $color }}-400 @endif
+                                        hover:underline">
+                                Выбрать тест →
+                            </span>
                         </div>
-                    </div>
+                    </a>
                 @endforeach
             </div>
         </div>
     </div>
-
-    {{-- Модальное окно для теории --}}
-    <div id="theoryModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-dark-card rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">📖 Теория</h3>
-                <button onclick="closeTheoryModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition">
-                    ✖
-                </button>
-            </div>
-            <div id="theoryContent" class="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300">
-                <!-- содержимое подставляется из JavaScript -->
-            </div>
-        </div>
-    </div>
-
     <script>
         function openTheoryModal(content) {
             document.getElementById('theoryContent').innerHTML = content;

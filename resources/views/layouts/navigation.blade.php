@@ -21,6 +21,9 @@
                         <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
                             {{ __('Админ-панель') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.tests.manage')" :active="request()->routeIs('admin.tests.manage')">
+                            {{ __('Управление тестами') }}
+                        </x-nav-link>
                     @endif
                 </div>
             </div>

@@ -15,10 +15,11 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         $testResults = TestResult::where('user_id', $user->id)
-                                ->with('test.subject')
-                                ->orderBy('completed_at', 'desc')
-                                ->take(10)
-                                ->get();
+                            ->whereHas('test')
+                            ->with('test.subject')
+                            ->orderBy('completed_at', 'desc')
+                            ->take(10)
+                            ->get();
         $purchases = Purchase::where('user_id', $user->id)
                             ->with('item')
                             ->orderBy('purchased_at', 'desc')
