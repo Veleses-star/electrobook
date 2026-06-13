@@ -25,6 +25,7 @@ COPY . .
 
 # Установка npm зависимостей и сборка (Vite / Laravel Mix)
 RUN npm install --no-audit --no-fund && \
+    chmod -R +x node_modules/.bin && \
     npm run build
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
