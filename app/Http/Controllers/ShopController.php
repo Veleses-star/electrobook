@@ -54,7 +54,7 @@ class ShopController extends Controller
             $user->can_change_theme = true;
             $message = "Тёмная тема активирована!";
         } elseif ($item->type === 'status') {
-            $user->active_status_id = $item->id;
+            $user->selected_status = $item->name;
             $message = "Статус '{$item->name}' применён!";
         } else {
             return redirect()->back()->with('error', 'Неизвестный тип товара.');
