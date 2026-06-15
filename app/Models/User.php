@@ -48,4 +48,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Purchase::class);
     }
+
+    public function activeStatus()
+    {
+        return $this->belongsTo(ShopItem::class, 'active_status_id');
+    }
 }

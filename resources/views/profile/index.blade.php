@@ -11,9 +11,9 @@
     </x-slot>
 
     <div class="py-12 bg-kid-bg dark:bg-dark-bg">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            <!-- ========== БЛОК АВАТАРА + СТАТИСТИКА ========== -->
+            <!-- Блок аватара и статистики -->
             <div class="bg-white dark:bg-dark-card rounded-2xl shadow-xl overflow-hidden">
                 <div class="p-6 md:p-8">
                     <div class="flex flex-col md:flex-row gap-8 items-center md:items-start">
@@ -34,14 +34,11 @@
                             @endif
                         </div>
 
-                        <!-- Информация пользователя и кнопки -->
+                        <!-- Информация и кнопки -->
                         <div class="flex-1 text-center md:text-left">
-                            <div class="mb-4">
-                                <h3 class="text-2xl md:text-3xl font-extrabold text-gray-800 dark:text-gray-100">{{ $user->name }}</h3>
-                                <p class="text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
-                            </div>
-
-                            <div class="flex flex-wrap gap-3 justify-center md:justify-start">
+                            <h3 class="text-2xl md:text-3xl font-extrabold text-gray-800 dark:text-gray-100">{{ $user->name }}</h3>
+                            <p class="text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
+                            <div class="flex flex-wrap gap-3 justify-center md:justify-start mt-4">
                                 @if($user->can_upload_avatar)
                                     <form action="{{ route('profile.avatar.upload') }}" method="POST" enctype="multipart/form-data" class="inline">
                                         @csrf
@@ -71,7 +68,7 @@
                     </div>
                 </div>
 
-                <!-- Статистика в три блока -->
+                <!-- Статистика -->
                 <div class="bg-gray-50 dark:bg-gray-800/50 p-6 grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-gray-100 dark:border-gray-700">
                     <div class="text-center">
                         <p class="text-3xl font-black text-kid-primary dark:text-dark-primary">{{ $totalTests }}</p>
@@ -88,16 +85,13 @@
                 </div>
             </div>
 
-            <!-- ========== ИСТОРИЯ ТЕСТОВ ========== -->
+            <!-- История тестов -->
             <div class="bg-white dark:bg-dark-card rounded-2xl shadow-xl overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
                     <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
                         📋 История тестов
                         <span class="text-sm font-normal text-gray-500 dark:text-gray-400">({{ $testResults->count() }} записей)</span>
                     </h3>
-                    @if($testResults->isNotEmpty())
-                        <span class="text-xs text-gray-400 dark:text-gray-500">Свежие сверху</span>
-                    @endif
                 </div>
                 <div class="divide-y divide-gray-100 dark:divide-gray-700">
                     @forelse($testResults as $result)
@@ -135,7 +129,7 @@
                 </div>
             </div>
 
-            <!-- ========== МОИ ПОКУПКИ ========== -->
+            <!-- Купленные товары -->
             <div class="bg-white dark:bg-dark-card rounded-2xl shadow-xl overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                     <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">

@@ -42,27 +42,25 @@ class ShopController extends Controller
     {
         $item = ShopItem::findOrFail($itemId);
         $user = Auth::user();
-        $purchase = Purchase::where('user_id', $user->id)
-                           ->where('item_id', $item->id)
-                           ->first();
+        $purchase = Purchase::where('user_id', $user->id)->where('item_id', $item->id)->first();
         if (!$purchase) {
             return redirect()->back()->with('error', 'Сначала купите товар!');
         }
+
         if ($item->type === 'avatar') {
             $user->can_upload_avatar = true;
-            $message = "Право загружать аватар активировано! Теперь вы можете загрузить аватар в профиле.";
-        } elseif ($item->type === 'frame') {
-            // Устанавливаем класс рамки
-            $user->frame_class = 'gold-frame';
-            $user->save();
-            $message = "Золотая рамка применена! Теперь включите её в профиле (кнопка «Включить золотую рамку»).";
+            $message = "Право загружать аватар активировано!";
         } elseif ($item->type === 'theme') {
             $user->can_change_theme = true;
-            $message = "Тёмная тема активирована! Теперь вы можете переключать тему кнопкой в навигации.";
+            $message = "Тёмная тема активирована!";
+        } elseif ($item->type === 'status') {
+            $user->active_status_id = $item->id;
+            $message = "Статус '{$item->name}' применён!";
         } else {
             return redirect()->back()->with('error', 'Неизвестный тип товара.');
         }
         $user->save();
+
         return redirect()->back()->with('success', $message);
     }
 }
