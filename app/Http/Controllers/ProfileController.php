@@ -15,19 +15,22 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         $testResults = TestResult::where('user_id', $user->id)
-                            ->whereHas('test')
-                            ->with('test.subject')
-                            ->orderBy('completed_at', 'desc')
-                            ->take(10)
-                            ->get();
+            ->whereHas('test')
+            ->with('test.subject')
+            ->orderBy('completed_at', 'desc')
+            ->take(10)
+            ->get();
+
         $purchases = Purchase::where('user_id', $user->id)
-                            ->whereHas('item')  
-                            ->with('item')
-                            ->orderBy('purchased_at', 'desc')
-                            ->get();
+            ->whereHas('item')
+            ->with('item')
+            ->orderBy('purchased_at', 'desc')
+            ->get();
+
         $totalTests = $testResults->count();
         $averageScore = $testResults->avg('percentage') ?? 0;
         $totalPoints = $user->points;
+
         return view('profile.index', compact('user', 'testResults', 'purchases', 'totalTests', 'averageScore', 'totalPoints'));
     }
 

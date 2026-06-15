@@ -41,13 +41,18 @@
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-300 bg-white dark:bg-dark-card hover:text-gray-700 dark:hover:text-gray-100 focus:outline-none transition">
                             @if(Auth::user()->avatar_path)
                                 <img src="{{ asset('storage/' . Auth::user()->avatar_path) }}" 
-                                     class="w-10 h-10 rounded-full object-cover {{ Auth::user()->frame_class }} mr-2">
+                                     class="w-10 h-10 rounded-full object-cover mr-2">
                             @else
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-kid-primary to-orange-400 flex items-center justify-center text-white mr-2 {{ Auth::user()->frame_class }}">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-kid-primary to-orange-400 flex items-center justify-center text-white mr-2">
                                     {{ substr(Auth::user()->name, 0, 1) }}
                                 </div>
                             @endif
-                            <div>{{ Auth::user()->name }}</div>
+                            <div class="flex flex-col items-start">
+                                <span>{{ Auth::user()->name }}</span>
+                                @if(Auth::user()->selected_status)
+                                    <span class="text-xs text-yellow-500 dark:text-yellow-400">🏆 {{ Auth::user()->selected_status }}</span>
+                                @endif
+                            </div>
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -108,6 +113,9 @@
             <div class="px-4">
                 <div class="font-medium text-base text-gray-800 dark:text-gray-100">{{ Auth::user()->name }}</div>
                 <div class="font-medium text-sm text-gray-500 dark:text-gray-400">{{ Auth::user()->email }}</div>
+                @if(Auth::user()->selected_status)
+                    <div class="text-xs text-yellow-500 dark:text-yellow-400 mt-1">🏆 {{ Auth::user()->selected_status }}</div>
+                @endif
             </div>
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="url('/profile')">

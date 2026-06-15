@@ -35,7 +35,7 @@ class ShopController extends Controller
             'user_id' => $user->id,
             'item_id' => $item->id,
         ]);
-        return redirect()->back()->with('success', "Товар '{$item->name}' успешно куплен! Нажмите «Применить» для активации.");
+        return redirect()->back()->with('success', "Товар успешно куплен! Нажмите «Применить» для активации.");
     }
 
     public function equip(Request $request, $itemId)
@@ -54,8 +54,14 @@ class ShopController extends Controller
             $user->can_change_theme = true;
             $message = "Тёмная тема активирована!";
         } elseif ($item->type === 'status') {
-            $user->selected_status = $item->name;
-            $message = "Статус '{$item->name}' применён!";
+            // Если уже выбран этот статус – снимаем его
+            if ($user->selected_status === $item->name) {
+                $user->selected_status = null;
+                $message = "Статус снят!";
+            } else {
+                $user->selected_status = $item->name;
+                $message = "Статус '{$item->name}' применён!";
+            }
         } else {
             return redirect()->back()->with('error', 'Неизвестный тип товара.');
         }
