@@ -21,6 +21,7 @@ class ProfileController extends Controller
                             ->take(10)
                             ->get();
         $purchases = Purchase::where('user_id', $user->id)
+                            ->whereHas('item')  
                             ->with('item')
                             ->orderBy('purchased_at', 'desc')
                             ->get();
