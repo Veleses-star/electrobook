@@ -43,7 +43,7 @@
                                 @if($user->can_upload_avatar)
                                     <form action="{{ route('profile.avatar.upload') }}" method="POST" enctype="multipart/form-data" class="inline">
                                         @csrf
-                                        <label class="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-200 transition">
+                                        <label class="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition">
                                             📸 Загрузить аватар
                                             <input type="file" name="avatar" accept="image/*" class="hidden" onchange="this.form.submit()">
                                         </label>
@@ -83,17 +83,17 @@
                         <div class="p-5">
                             <div class="flex justify-between">
                                 <div>
-                                    <h4 class="font-bold">{{ $result->test->title }}</h4>
-                                    <div class="text-sm text-gray-500">📚 {{ $result->test->subject->name }} • {{ $result->completed_at->format('d.m.Y H:i') }}</div>
+                                    <h4 class="font-bold text-gray-800 dark:text-gray-100">{{ $result->test->title }}</h4>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">📚 {{ $result->test->subject->name }} • {{ $result->completed_at->format('d.m.Y H:i') }}</div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-2xl font-bold {{ $result->percentage >= 80 ? 'text-green-600' : ($result->percentage >= 50 ? 'text-yellow-600' : 'text-red-600') }}">
+                                    <div class="text-2xl font-bold {{ $result->percentage >= 80 ? 'text-green-600 dark:text-green-400' : ($result->percentage >= 50 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400') }}">
                                         {{ $result->percentage }}%
                                     </div>
-                                    <div class="text-xs">{{ $result->score }}/{{ $result->max_score }}</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ $result->score }}/{{ $result->max_score }}</div>
                                 </div>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
                                 <div class="h-full rounded-full {{ $result->percentage >= 80 ? 'bg-green-500' : ($result->percentage >= 50 ? 'bg-yellow-500' : 'bg-red-500') }}" style="width: {{ $result->percentage }}%"></div>
                             </div>
                         </div>
@@ -103,10 +103,10 @@
                 </div>
             </div>
 
-            <!-- Купленные товары -->
+            <!-- Купленные товары (с возможностью применить статус) -->
             <div class="bg-white dark:bg-dark-card rounded-2xl shadow-xl overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                    <h3 class="text-lg font-bold flex items-center gap-2">🛍️ Мои покупки <span class="text-sm font-normal text-gray-500">({{ $purchases->count() }} шт.)</span></h3>
+                    <h3 class="text-lg font-bold flex items-center gap-2 text-gray-800 dark:text-gray-100">🛍️ Мои покупки <span class="text-sm font-normal text-gray-500 dark:text-gray-400">({{ $purchases->count() }} шт.)</span></h3>
                 </div>
                 <div class="divide-y divide-gray-100 dark:divide-gray-700">
                     @forelse($purchases as $purchase)
@@ -119,16 +119,21 @@
                                         @else 🎨 @endif
                                     </div>
                                     <div>
-                                        <p class="font-bold">{{ $purchase->item->name }}</p>
-                                        <p class="text-xs text-gray-500">{{ $purchase->item->type === 'avatar' ? 'Аватар' : ($purchase->item->type === 'status' ? 'Статус' : 'Тема') }} • {{ $purchase->purchased_at->format('d.m.Y') }}</p>
+                                        <p class="font-bold text-gray-800 dark:text-gray-100">{{ $purchase->item->name }}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $purchase->item->type === 'avatar' ? 'Аватар' : ($purchase->item->type === 'status' ? 'Статус' : 'Тема') }} • {{ $purchase->purchased_at->format('d.m.Y') }}</p>
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-yellow-500 font-bold">{{ $purchase->item->price }} ⭐</p>
-                                    @if($purchase->item->type === 'theme' && !$user->can_change_theme)
-                                        <form action="{{ route('shop.equip', $purchase->item_id) }}" method="POST">
+                                    <p class="text-yellow-500 dark:text-yellow-400 font-bold">{{ $purchase->item->price }} ⭐</p>
+                                    @if($purchase->item->type === 'status' && $user->selected_status !== $purchase->item->name)
+                                        <form action="{{ route('shop.equip', $purchase->item_id) }}" method="POST" class="mt-1">
                                             @csrf
-                                            <button class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-lg">Применить</button>
+                                            <button type="submit" class="text-xs bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 px-2 py-1 rounded-lg">Применить</button>
+                                        </form>
+                                    @elseif($purchase->item->type === 'theme' && !$user->can_change_theme)
+                                        <form action="{{ route('shop.equip', $purchase->item_id) }}" method="POST" class="mt-1">
+                                            @csrf
+                                            <button type="submit" class="text-xs bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 px-2 py-1 rounded-lg">Применить</button>
                                         </form>
                                     @endif
                                 </div>

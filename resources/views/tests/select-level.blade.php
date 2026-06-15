@@ -75,10 +75,10 @@
                         
                         $iconMap = match($subject->name) {
                             'Математика' => [
-                                'class_1' => '➕',
-                                'class_2' => '➖',
+                                'class_1' => '🔢',
+                                'class_2' => '📐',
                                 'class_3' => '✖️',
-                                'class_4' => '➗',
+                                'class_4' => '📈',
                             ],
                             'Русский язык' => [
                                 'class_1' => '🔤',
