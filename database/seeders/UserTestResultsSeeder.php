@@ -13,18 +13,19 @@ class UserTestResultsSeeder extends Seeder
     public function run()
     {
         $tests = Test::where('is_active', true)->get();
-
         if ($tests->isEmpty()) {
-            $this->command->error('Нет активных тестов! Сначала создайте тесты.');
+            $this->command->error('Нет активных тестов!');
             return;
         }
 
+        // Массивы для генерации имён
         $firstNames = ['Алексей', 'Максим', 'Дмитрий', 'Андрей', 'Сергей', 'Анна', 'Екатерина', 'Ольга', 'Татьяна', 'Виктор', 'Елена', 'Ирина', 'Мария', 'Владимир', 'Александр', 'Даниил', 'Михаил', 'Никита', 'Артём', 'Иван', 'София', 'Алиса', 'Вероника', 'Анастасия', 'Полина', 'Егор', 'Роман', 'Матвей', 'Тимофей', 'Кирилл'];
         $lastNames = ['Иванов', 'Петров', 'Сидоров', 'Кузнецов', 'Смирнов', 'Попов', 'Фёдоров', 'Морозов', 'Волков', 'Алексеев', 'Лебедев', 'Соколов', 'Новиков', 'Козлов', 'Медведев', 'Егоров', 'Сергеев', 'Карпов', 'Михайлов', 'Николаев'];
 
+        $userIds = [];
         $usedEmails = [];
-        $users = [];
 
+        // Создаём 30 учеников и сохраняем их ID
         for ($i = 0; $i < 30; $i++) {
             $firstName = $firstNames[array_rand($firstNames)];
             $lastName = $lastNames[array_rand($lastNames)];
@@ -42,25 +43,26 @@ class UserTestResultsSeeder extends Seeder
                 'role' => 'student',
                 'points' => 0,
             ]);
-            $users[] = $user;
+            $userIds[] = $user->id;
         }
 
-        // Преобразуем массив пользователей в коллекцию для удобства работы
-        $usersCollection = collect($users);
-
+        // Для каждого теста создаём результаты для случайных 5–15 пользователей (по ID)
         foreach ($tests as $test) {
             $numResults = rand(5, 15);
-            $randomUsers = $this->randomElements($usersCollection, $numResults);
+            $randomUserIds = $this->randomElements($userIds, $numResults);
             $maxScore = $test->questions->count();
             if ($maxScore == 0) continue;
 
-            foreach ($randomUsers as $user) {
+            foreach ($randomUserIds as $userId) {
+                $user = User::find($userId);
+                if (!$user) continue;
+
                 $score = rand(0, $maxScore);
                 $percentage = ($maxScore > 0) ? round(($score / $maxScore) * 100, 2) : 0;
                 $completedAt = $this->randomDate('-30 days');
 
                 TestResult::create([
-                    'user_id' => $user->id,
+                    'user_id' => $userId,
                     'test_id' => $test->id,
                     'score' => $score,
                     'max_score' => $maxScore,
@@ -73,12 +75,18 @@ class UserTestResultsSeeder extends Seeder
             }
         }
 
-        // Дополнительные результаты для каждого ученика
-        foreach ($users as $user) {
-            $additionalTests = $this->randomElements($tests, rand(0, 5));
-            foreach ($additionalTests as $test) {
-                $exists = TestResult::where('user_id', $user->id)
-                                    ->where('test_id', $test->id)
+        // Дополнительные случайные результаты (0–5 на пользователя)
+        foreach ($userIds as $userId) {
+            $user = User::find($userId);
+            if (!$user) continue;
+
+            $additionalTests = $this->randomElements($tests->pluck('id')->toArray(), rand(0, 5));
+            foreach ($additionalTests as $testId) {
+                $test = Test::find($testId);
+                if (!$test) continue;
+
+                $exists = TestResult::where('user_id', $userId)
+                                    ->where('test_id', $testId)
                                     ->exists();
                 if (!$exists) {
                     $maxScore = $test->questions->count();
@@ -88,8 +96,8 @@ class UserTestResultsSeeder extends Seeder
                     $completedAt = $this->randomDate('-30 days');
 
                     TestResult::create([
-                        'user_id' => $user->id,
-                        'test_id' => $test->id,
+                        'user_id' => $userId,
+                        'test_id' => $testId,
                         'score' => $score,
                         'max_score' => $maxScore,
                         'percentage' => $percentage,
@@ -106,9 +114,9 @@ class UserTestResultsSeeder extends Seeder
         $this->command->info("Пароль для всех учеников: 12345678");
     }
 
+    // Вспомогательный метод для случайной выборки элементов из массива
     private function randomElements($array, $count)
     {
-        // Если это коллекция, преобразуем в массив
         if ($array instanceof \Illuminate\Support\Collection) {
             $array = $array->toArray();
         }
@@ -116,6 +124,7 @@ class UserTestResultsSeeder extends Seeder
         return array_slice($array, 0, $count);
     }
 
+    // Вспомогательный метод для случайной даты
     private function randomDate($modify)
     {
         $timestamp = strtotime($modify);
