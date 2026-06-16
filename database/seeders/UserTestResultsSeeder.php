@@ -19,21 +19,17 @@ class UserTestResultsSeeder extends Seeder
             return;
         }
 
-        // Массивы для генерации имён
         $firstNames = ['Алексей', 'Максим', 'Дмитрий', 'Андрей', 'Сергей', 'Анна', 'Екатерина', 'Ольга', 'Татьяна', 'Виктор', 'Елена', 'Ирина', 'Мария', 'Владимир', 'Александр', 'Даниил', 'Михаил', 'Никита', 'Артём', 'Иван', 'София', 'Алиса', 'Вероника', 'Анастасия', 'Полина', 'Егор', 'Роман', 'Матвей', 'Тимофей', 'Кирилл'];
         $lastNames = ['Иванов', 'Петров', 'Сидоров', 'Кузнецов', 'Смирнов', 'Попов', 'Фёдоров', 'Морозов', 'Волков', 'Алексеев', 'Лебедев', 'Соколов', 'Новиков', 'Козлов', 'Медведев', 'Егоров', 'Сергеев', 'Карпов', 'Михайлов', 'Николаев'];
 
-        // Генерируем уникальные email
         $usedEmails = [];
-
-        // Создаём 30 учеников
         $users = [];
+
         for ($i = 0; $i < 30; $i++) {
             $firstName = $firstNames[array_rand($firstNames)];
             $lastName = $lastNames[array_rand($lastNames)];
             $name = $firstName . ' ' . $lastName;
 
-            // Генерируем уникальный email
             do {
                 $email = strtolower($firstName . '.' . $lastName . rand(1, 999)) . '@example.com';
             } while (in_array($email, $usedEmails));
@@ -49,12 +45,14 @@ class UserTestResultsSeeder extends Seeder
             $users[] = $user;
         }
 
-        // Для каждого теста создаём результаты для случайных 5–15 учеников
+        // Преобразуем массив пользователей в коллекцию для удобства работы
+        $usersCollection = collect($users);
+
         foreach ($tests as $test) {
             $numResults = rand(5, 15);
-            $randomUsers = $this->randomElements($users, $numResults);
+            $randomUsers = $this->randomElements($usersCollection, $numResults);
             $maxScore = $test->questions->count();
-            if ($maxScore == 0) continue; // пропускаем тесты без вопросов
+            if ($maxScore == 0) continue;
 
             foreach ($randomUsers as $user) {
                 $score = rand(0, $maxScore);
@@ -75,7 +73,7 @@ class UserTestResultsSeeder extends Seeder
             }
         }
 
-        // Дополнительные случайные результаты (0–5 на ученика)
+        // Дополнительные результаты для каждого ученика
         foreach ($users as $user) {
             $additionalTests = $this->randomElements($tests, rand(0, 5));
             foreach ($additionalTests as $test) {
@@ -108,14 +106,16 @@ class UserTestResultsSeeder extends Seeder
         $this->command->info("Пароль для всех учеников: 12345678");
     }
 
-    // Вспомогательный метод для случайной выборки элементов (без Faker)
     private function randomElements($array, $count)
     {
+        // Если это коллекция, преобразуем в массив
+        if ($array instanceof \Illuminate\Support\Collection) {
+            $array = $array->toArray();
+        }
         shuffle($array);
         return array_slice($array, 0, $count);
     }
 
-    // Вспомогательный метод для случайной даты
     private function randomDate($modify)
     {
         $timestamp = strtotime($modify);
