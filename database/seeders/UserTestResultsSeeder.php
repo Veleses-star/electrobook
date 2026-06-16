@@ -7,13 +7,12 @@ use App\Models\User;
 use App\Models\Test;
 use App\Models\TestResult;
 use Illuminate\Support\Facades\Hash;
-use Faker\Factory as Faker;
 
 class UserTestResultsSeeder extends Seeder
 {
     public function run()
     {
-        $faker = Faker::create();
+        $faker = fake(); // Встроенный хелпер Laravel
         $tests = Test::where('is_active', true)->get();
         $numUsers = 30;
 
@@ -28,7 +27,7 @@ class UserTestResultsSeeder extends Seeder
             $user = User::create([
                 'name' => $faker->name,
                 'email' => $faker->unique()->safeEmail,
-                'password' => Hash::make('12345678'), // Пароль для всех
+                'password' => Hash::make('12345678'),
                 'role' => 'student',
                 'points' => 0,
             ]);
