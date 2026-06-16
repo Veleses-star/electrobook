@@ -12,21 +12,36 @@ class UserTestResultsSeeder extends Seeder
 {
     public function run()
     {
-        $faker = fake(); // Встроенный хелпер Laravel
         $tests = Test::where('is_active', true)->get();
-        $numUsers = 30;
 
         if ($tests->isEmpty()) {
             $this->command->error('Нет активных тестов! Сначала создайте тесты.');
             return;
         }
 
+        // Массивы для генерации имён
+        $firstNames = ['Алексей', 'Максим', 'Дмитрий', 'Андрей', 'Сергей', 'Анна', 'Екатерина', 'Ольга', 'Татьяна', 'Виктор', 'Елена', 'Ирина', 'Мария', 'Владимир', 'Александр', 'Даниил', 'Михаил', 'Никита', 'Артём', 'Иван', 'София', 'Алиса', 'Вероника', 'Анастасия', 'Полина', 'Егор', 'Роман', 'Матвей', 'Тимофей', 'Кирилл'];
+        $lastNames = ['Иванов', 'Петров', 'Сидоров', 'Кузнецов', 'Смирнов', 'Попов', 'Фёдоров', 'Морозов', 'Волков', 'Алексеев', 'Лебедев', 'Соколов', 'Новиков', 'Козлов', 'Медведев', 'Егоров', 'Сергеев', 'Карпов', 'Михайлов', 'Николаев'];
+
+        // Генерируем уникальные email
+        $usedEmails = [];
+
         // Создаём 30 учеников
         $users = [];
-        for ($i = 0; $i < $numUsers; $i++) {
+        for ($i = 0; $i < 30; $i++) {
+            $firstName = $firstNames[array_rand($firstNames)];
+            $lastName = $lastNames[array_rand($lastNames)];
+            $name = $firstName . ' ' . $lastName;
+
+            // Генерируем уникальный email
+            do {
+                $email = strtolower($firstName . '.' . $lastName . rand(1, 999)) . '@example.com';
+            } while (in_array($email, $usedEmails));
+            $usedEmails[] = $email;
+
             $user = User::create([
-                'name' => $faker->name,
-                'email' => $faker->unique()->safeEmail,
+                'name' => $name,
+                'email' => $email,
                 'password' => Hash::make('12345678'),
                 'role' => 'student',
                 'points' => 0,
@@ -37,14 +52,14 @@ class UserTestResultsSeeder extends Seeder
         // Для каждого теста создаём результаты для случайных 5–15 учеников
         foreach ($tests as $test) {
             $numResults = rand(5, 15);
-            $randomUsers = $faker->randomElements($users, $numResults);
+            $randomUsers = $this->randomElements($users, $numResults);
             $maxScore = $test->questions->count();
             if ($maxScore == 0) continue; // пропускаем тесты без вопросов
 
             foreach ($randomUsers as $user) {
                 $score = rand(0, $maxScore);
                 $percentage = ($maxScore > 0) ? round(($score / $maxScore) * 100, 2) : 0;
-                $completedAt = $faker->dateTimeBetween('-30 days', 'now');
+                $completedAt = $this->randomDate('-30 days');
 
                 TestResult::create([
                     'user_id' => $user->id,
@@ -62,7 +77,7 @@ class UserTestResultsSeeder extends Seeder
 
         // Дополнительные случайные результаты (0–5 на ученика)
         foreach ($users as $user) {
-            $additionalTests = $faker->randomElements($tests, rand(0, 5));
+            $additionalTests = $this->randomElements($tests, rand(0, 5));
             foreach ($additionalTests as $test) {
                 $exists = TestResult::where('user_id', $user->id)
                                     ->where('test_id', $test->id)
@@ -72,7 +87,7 @@ class UserTestResultsSeeder extends Seeder
                     if ($maxScore == 0) continue;
                     $score = rand(0, $maxScore);
                     $percentage = ($maxScore > 0) ? round(($score / $maxScore) * 100, 2) : 0;
-                    $completedAt = $faker->dateTimeBetween('-30 days', 'now');
+                    $completedAt = $this->randomDate('-30 days');
 
                     TestResult::create([
                         'user_id' => $user->id,
@@ -91,5 +106,20 @@ class UserTestResultsSeeder extends Seeder
 
         $this->command->info("✅ Создано 30 учеников и сгенерированы результаты тестов.");
         $this->command->info("Пароль для всех учеников: 12345678");
+    }
+
+    // Вспомогательный метод для случайной выборки элементов (без Faker)
+    private function randomElements($array, $count)
+    {
+        shuffle($array);
+        return array_slice($array, 0, $count);
+    }
+
+    // Вспомогательный метод для случайной даты
+    private function randomDate($modify)
+    {
+        $timestamp = strtotime($modify);
+        $randomTimestamp = rand($timestamp, time());
+        return date('Y-m-d H:i:s', $randomTimestamp);
     }
 }
